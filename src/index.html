@@ -17,27 +17,67 @@
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
         x-model="inputText"
         @input="jsonInputHandler()"></textarea>
-      <!-- <template x-for=""></template> -->
+      <template x-for="item in tree">
+        <div x-show="item.isImportant">
+          <span x-text="item.key" :class="`pl-{item.depth*20}px`"></span>
+          <button
+            class="btn btn-link"
+            x-data="{appearance:['△', '▽'], appIdx:0}"
+            x-init="appIdx = item.isOpen ? 1:0"
+            x-show="item.hasChild"
+            @click="item.isOpen = !item.isOpen, appIdx = Math.abs(appIdx - 1)"
+            x-text="appearance[appIdx]"></button>
+          <span x-show="!item.hasChild||item.isOpen" x-text="item.value"></span>
+          <!-- <template x-show="item.hasChild&&item.isOpen">not yet implemented</template> -->
+        </div>
+      </template>
       <!-- <div x-text="JSON.stringify(tree)"></div> -->
     </main>
     <script>
       document.addEventListener("alpine:init", () => {
         Alpine.data("handleInput", () => ({
           inputText: "",
-          tree: null,
+          tree: [],
           jsonInputHandler() {
             try {
               const parsed = JSON.parse(this.inputText);
-              this.tree = this.buildTree(parsed);
+              this.tree = [];
+              this.buildTree(this.tree, parsed, 0);
               console.log(this.tree);
-            } catch (e) {}
+            } catch (e) {
+              this.tree = [];
+            }
           },
-          buildTree(obj) {
+          buildTree(tree, obj, depth) {
+            const importantKeys = [
+              "asin",
+              "product_title",
+              "product_price",
+              "product_original_price",
+              "product_star_rating",
+              "product_num_ratings",
+              "product_url",
+              "about_product",
+              "customers_say",
+              "delivery",
+              "deal_badge",
+            ];
             if (typeof obj === "object" && obj !== null) {
-              return Object.entries(obj).map(([K, V]) => {
-                return { key: K, value: this.buildTree(V) };
+              Object.entries(obj).forEach(([K, V]) => {
+                const isImportant = importantKeys.includes(K);
+                const isObject = typeof V === "object" && V !== null;
+                const child = {
+                  key: K,
+                  value: isObject ? "" : V,
+                  depth: depth,
+                  hasChild: isObject,
+                  isImportant: isImportant ? true : false,
+                  isOpen: isImportant ? true : false,
+                };
+                tree.push(child);
+                if (isObject) this.buildTree(tree, V, depth + 1);
               });
-            } else return obj;
+            }
           },
         }));
       });
