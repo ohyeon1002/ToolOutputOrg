@@ -1,0 +1,108 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="./output.css" />
+    <title>JSON output organize</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body class="w-screen h-full flex flex-col items-center overflow-x-hidden">
+    <h1 class="text-5xl">툴아웃풋</h1>
+    <main
+      class="w-full h-full flex flex-col items-center justify-center"
+      id="app">
+      <textarea
+        class="textarea w-2/3 h-1/8 focus:outline-none"
+        placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
+        v-model="inputText"
+        @input="jsonInputHandler()"></textarea>
+      <div class="w-2/3 flex-1 overflow-y-auto">
+        <template v-for="item in parsedTree">
+          <!-- <details
+            v-show="item.isImportant"
+            class="my-1 py-0.5 collapse bg-base-100 border"
+            :open="item.isOpen||!item.hasChild"> -->
+          <details class="my-1 py-0.5 collapse bg-base-100 border" open>
+            <summary
+              class="py-2 collapse-title bg-primary-content font-semibold"
+              v-text="item.key"></summary>
+            <!-- <div
+              class="collapse-content text-sm"
+              v-show="!item.hasChild"
+              v-text="item.value"></div> -->
+            <div class="collapse-content text-sm" v-text="item.value"></div>
+            <template v-if="item.hasChild">
+              <template v-for="child in item.children">
+                <details
+                  class="my-1 ml-3 collapse bg-base-200 border-base-300 border"
+                  open>
+                  <summary
+                    class="collapse-title bg-secondary-content font-semibold"
+                    v-text="child.key"></summary>
+                  <div
+                    class="collapse-content text-sm"
+                    v-show="!child.hasChild"
+                    v-text="child.value"></div>
+                </details>
+              </template>
+            </template>
+          </details>
+        </template>
+      </div>
+    </main>
+    <script>
+      const importantKeys = new Set([
+        "asin",
+        "product_title",
+        "product_price",
+        "product_original_price",
+        "product_star_rating",
+        "product_num_ratings",
+        "product_url",
+        "about_product",
+        "customers_say",
+        "delivery",
+        "deal_badge",
+        "title",
+        "snippet",
+        "subnews",
+        "newsUrl",
+        "publisher",
+      ]);
+      const { createApp } = Vue;
+      const app = createApp({
+        data() {
+          return {
+            inputText: "",
+            parsedTree: null,
+          };
+        },
+        methods: {
+          jsonInputHandler() {
+            try {
+              const parsed = JSON.parse(this.inputText);
+              this.parsedTree = this.buildTree(parsed);
+              console.log(this.parsedTree);
+            } catch (e) {
+              this.parsedTree = null;
+            }
+          },
+          buildTree(obj) {
+            if (typeof obj === "object" && obj !== null) {
+              return Object.entries(obj).map(([K, V]) => {
+                const isChildObject = typeof V === "object" && V !== null;
+                return {
+                  key: K,
+                  value: isChildObject ? null : V,
+                  hasChild: isChildObject,
+                  children: isChildObject ? this.buildTree(V) : null,
+                };
+              });
+            } else return obj;
+          },
+        },
+      });
+      app.mount("#app");
+    </script>
+    <footer></footer>
+  </body>
+</html>
