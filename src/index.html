@@ -7,77 +7,89 @@
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.2/dist/cdn.min.js"></script>
   </head>
-  <body class="w-screen h-full flex flex-col items-center">
+  <body class="w-screen h-full flex flex-col items-center overflow-x-hidden">
     <h1 class="text-5xl">툴아웃풋</h1>
     <main
       class="w-full h-full flex flex-col items-center justify-center"
       x-data="handleInput">
       <textarea
-        class="textarea w-1/2 h-1/2 focus:outline-none"
+        class="textarea w-2/3 h-1/8 focus:outline-none"
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
         x-model="inputText"
         @input="jsonInputHandler()"></textarea>
-      <template x-for="item in tree">
-        <div x-show="item.isImportant">
-          <span x-text="item.key" :class="`pl-{item.depth*20}px`"></span>
-          <button
-            class="btn btn-link"
-            x-data="{appearance:['△', '▽'], appIdx:0}"
-            x-init="appIdx = item.isOpen ? 1:0"
-            x-show="item.hasChild"
-            @click="item.isOpen = !item.isOpen, appIdx = Math.abs(appIdx - 1)"
-            x-text="appearance[appIdx]"></button>
-          <span x-show="!item.hasChild||item.isOpen" x-text="item.value"></span>
-          <!-- <template x-show="item.hasChild&&item.isOpen">not yet implemented</template> -->
-        </div>
-      </template>
-      <!-- <div x-text="JSON.stringify(tree)"></div> -->
+      <div class="w-2/3 flex-1 overflow-y-auto">
+        <template x-for="item in tree">
+          <details
+            x-show="item.isImportant"
+            class="my-1 py-0.5 collapse bg-base-100 border"
+            :open="item.isOpen||!item.hasChild">
+            <summary
+              class="collapse-title bg-primary-content font-semibold"
+              x-text="item.key"></summary>
+            <div
+              class="collapse-content text-sm"
+              x-show="!item.hasChild"
+              x-text="item.value"></div>
+            <template x-if="item.hasChild">
+              <template x-for="child in item.value">
+                <details
+                  class="my-1 ml-3 collapse bg-base-200 border-base-300 border"
+                  open>
+                  <summary
+                    class="collapse-title bg-secondary-content font-semibold"
+                    x-text="child.key"></summary>
+                  <div
+                    class="collapse-content text-sm"
+                    x-show="!child.hasChild"
+                    x-text="child.value"></div>
+                </details>
+              </template>
+            </template>
+          </details>
+        </template>
+      </div>
     </main>
     <script>
+      const importantKeys = new Set([
+        "asin",
+        "product_title",
+        "product_price",
+        "product_original_price",
+        "product_star_rating",
+        "product_num_ratings",
+        "product_url",
+        "about_product",
+        "customers_say",
+        "delivery",
+        "deal_badge",
+      ]);
       document.addEventListener("alpine:init", () => {
         Alpine.data("handleInput", () => ({
           inputText: "",
-          tree: [],
+          tree: null,
           jsonInputHandler() {
             try {
               const parsed = JSON.parse(this.inputText);
-              this.tree = [];
-              this.buildTree(this.tree, parsed, 0);
+              this.tree = this.buildTree(parsed);
               console.log(this.tree);
             } catch (e) {
-              this.tree = [];
+              this.tree = null;
             }
           },
-          buildTree(tree, obj, depth) {
-            const importantKeys = [
-              "asin",
-              "product_title",
-              "product_price",
-              "product_original_price",
-              "product_star_rating",
-              "product_num_ratings",
-              "product_url",
-              "about_product",
-              "customers_say",
-              "delivery",
-              "deal_badge",
-            ];
-            if (typeof obj === "object" && obj !== null) {
-              Object.entries(obj).forEach(([K, V]) => {
-                const isImportant = importantKeys.includes(K);
+          buildTree(obj) {
+            if (typeof obj === "object" && obj !== null)
+              return Object.entries(obj).map(([K, V]) => {
                 const isObject = typeof V === "object" && V !== null;
-                const child = {
+                const isImportant = importantKeys.has(K);
+                return {
                   key: K,
-                  value: isObject ? "" : V,
-                  depth: depth,
+                  value: this.buildTree(V),
                   hasChild: isObject,
-                  isImportant: isImportant ? true : false,
-                  isOpen: isImportant ? true : false,
+                  isImportant: isImportant,
+                  isOpen: isImportant && isObject,
                 };
-                tree.push(child);
-                if (isObject) this.buildTree(tree, V, depth + 1);
               });
-            }
+            else return obj;
           },
         }));
       });
