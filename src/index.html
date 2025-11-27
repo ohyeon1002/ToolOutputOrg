@@ -24,7 +24,7 @@
             class="my-1 py-0.5 collapse bg-base-100 border"
             :open="item.isOpen||!item.hasChild">
             <summary
-              class="collapse-title bg-primary-content font-semibold"
+              class="py-2 collapse-title bg-primary-content font-semibold"
               x-text="item.key"></summary>
             <div
               class="collapse-content text-sm"
@@ -62,6 +62,11 @@
         "customers_say",
         "delivery",
         "deal_badge",
+        "title",
+        "snippet",
+        "subnews",
+        "newsUrl",
+        "publisher",
       ]);
       document.addEventListener("alpine:init", () => {
         Alpine.data("handleInput", () => ({
@@ -81,12 +86,13 @@
               return Object.entries(obj).map(([K, V]) => {
                 const isObject = typeof V === "object" && V !== null;
                 const isImportant = importantKeys.has(K);
+                const isInArray = Array.isArray(obj);
                 return {
                   key: K,
                   value: this.buildTree(V),
                   hasChild: isObject,
-                  isImportant: isImportant,
-                  isOpen: isImportant && isObject,
+                  isImportant: isInArray ? true : isImportant,
+                  isOpen: isInArray || (isImportant && isObject),
                 };
               });
             else return obj;
