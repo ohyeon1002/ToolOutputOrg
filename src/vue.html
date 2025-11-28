@@ -10,25 +10,33 @@
     <main
       class="w-full h-full flex flex-col items-center justify-center"
       id="app">
+      <button class="btn btn-soft btn-secondary" @click="textAreaEraser()">
+        RESET
+      </button>
       <textarea
         class="textarea w-2/3 h-1/8 focus:outline-none"
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
         v-model="inputText"
         @input="jsonInputHandler()"></textarea>
-      <div class="w-2/3 flex-1 overflow-y-auto">
-        <template v-for="item in parsedTree">
-          <!-- <details
+      <div
+        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 gap-x-5 auto-rows-max">
+        <recur
+          v-for="node in parsedTree"
+          :node="node"
+          :bgcolor="bgColor"></recur>
+        <!-- <template v-for="item in parsedTree">
+          <details
             v-show="item.isImportant"
             class="my-1 py-0.5 collapse bg-base-100 border"
-            :open="item.isOpen||!item.hasChild"> -->
+            :open="item.isOpen||!item.hasChild">
           <details class="my-1 py-0.5 collapse bg-base-100 border" open>
             <summary
               class="py-2 collapse-title bg-primary-content font-semibold"
               v-text="item.key"></summary>
-            <!-- <div
+            <div
               class="collapse-content text-sm"
               v-show="!item.hasChild"
-              v-text="item.value"></div> -->
+              v-text="item.value"></div>
             <div class="collapse-content text-sm" v-text="item.value"></div>
             <template v-if="item.hasChild">
               <template v-for="child in item.children">
@@ -46,7 +54,7 @@
               </template>
             </template>
           </details>
-        </template>
+        </template> -->
       </div>
     </main>
     <script>
@@ -74,32 +82,61 @@
           return {
             inputText: "",
             parsedTree: null,
+            bgColor: [
+              "bg-sky-200",
+              "bg-teal-100",
+              "bg-lime-100",
+              "bg-amber-100",
+              "bg-pink-100",
+              "bg-purple-100",
+            ],
+            allKeys: new Set(),
           };
         },
         methods: {
           jsonInputHandler() {
             try {
+              this.allKeys.clear();
               const parsed = JSON.parse(this.inputText);
-              this.parsedTree = this.buildTree(parsed);
+              this.parsedTree = this.buildTree(parsed, 0);
               console.log(this.parsedTree);
             } catch (e) {
               this.parsedTree = null;
             }
           },
-          buildTree(obj) {
+          buildTree(obj, depth) {
             if (typeof obj === "object" && obj !== null) {
               return Object.entries(obj).map(([K, V]) => {
+                if (Number.isNaN) this.allKeys.add(K);
                 const isChildObject = typeof V === "object" && V !== null;
                 return {
                   key: K,
-                  value: isChildObject ? null : V,
+                  value: isChildObject ? null : V == null ? "null" : V,
+                  isImportant:
+                    importantKeys.has(K) ||
+                    !importantKeys.isDisjointFrom(new Set(Object.keys(V))),
                   hasChild: isChildObject,
-                  children: isChildObject ? this.buildTree(V) : null,
+                  children: isChildObject ? this.buildTree(V, depth + 1) : null,
+                  isLong: isChildObject || String(V).length > 35,
+                  depth: depth,
                 };
               });
             } else return obj;
           },
+          textAreaEraser() {
+            this.inputText = "";
+            this.parsedTree = null;
+          },
         },
+      });
+      app.component("recur", {
+        name: "recur",
+        props: ["node", "bgcolor"],
+        template: `<details class="my-1 py-0.5 collapse bg-base-100 border" v-show="node.isImportant" :class="{'col-span-5': node.isLong}" open>
+                    <summary class="py-2 collapse-title font-semibold" v-text="node.key" v-if="bgcolor" :class="bgcolor[node.depth%6]"></summary>
+                    <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
+                    <div v-else><recur v-for="child in node.children" :node="child" :bgcolor="bgcolor" style="margin-left:10px"></recur></div>
+                  </details>`,
       });
       app.mount("#app");
     </script>

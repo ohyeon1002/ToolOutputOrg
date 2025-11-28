@@ -17,12 +17,14 @@
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
         x-model="inputText"
         @input="jsonInputHandler()"></textarea>
-      <div class="w-2/3 flex-1 overflow-y-auto">
+      <div
+        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 auto-rows-max gap-4">
         <template x-for="item in tree">
           <details
             x-show="item.isImportant"
             class="my-1 py-0.5 collapse bg-base-100 border"
-            :open="item.isOpen||!item.hasChild">
+            :open="item.isOpen||!item.hasChild"
+            :class="!item.isShort&&'col-span-5'">
             <summary
               class="py-2 collapse-title bg-primary-content font-semibold"
               x-text="item.key"></summary>
@@ -91,6 +93,7 @@
                   key: K,
                   value: this.buildTree(V),
                   hasChild: isObject,
+                  isShort: isObject ? false : String(V).length < 35,
                   isImportant: isInArray ? true : isImportant,
                   isOpen: isInArray || (isImportant && isObject),
                 };
