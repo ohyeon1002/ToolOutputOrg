@@ -76,6 +76,10 @@
         "newsUrl",
         "publisher",
         "url",
+        "symbol",
+        "companyName",
+        "primaryData",
+        "keyStats",
       ]);
       const { createApp } = Vue;
       const app = createApp({
@@ -91,13 +95,13 @@
               "bg-pink-100",
               "bg-purple-100",
             ],
-            allKeys: new Set(),
+            // allKeys: new Set(),
           };
         },
         methods: {
           jsonInputHandler() {
             try {
-              this.allKeys.clear();
+              // this.allKeys.clear();
               const parsed = JSON.parse(this.inputText);
               this.parsedTree = this.buildTree(parsed, 0);
               console.log(this.parsedTree);
@@ -108,14 +112,13 @@
           buildTree(obj, depth) {
             if (typeof obj === "object" && obj !== null) {
               return Object.entries(obj).map(([K, V]) => {
-                if (Number.isNaN) this.allKeys.add(K);
+                // if (Number.isNaN) this.allKeys.add(K);
                 const isChildObject = typeof V === "object" && V !== null;
                 return {
                   key: K,
                   value: isChildObject ? null : V == null ? "null" : V,
-                  isImportant:
-                    importantKeys.has(K) ||
-                    !importantKeys.isDisjointFrom(new Set(Object.keys(V))),
+                  isImportant: importantKeys.has(K),
+                  // ||!importantKeys.isDisjointFrom(new Set(Object.keys(V))),
                   hasChild: isChildObject,
                   children: isChildObject ? this.buildTree(V, depth + 1) : null,
                   isLong: isChildObject || String(V).length > 35,
