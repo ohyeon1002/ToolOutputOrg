@@ -2,107 +2,221 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="./output.css" />
+    <link rel="icon" href="./brackets.svg" />
     <title>JSON output organize</title>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.2/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      .v-enter-active,
+      .v-leave-active {
+        transition: opacity 0.5s ease;
+      }
+
+      .v-enter-from,
+      .v-leave-to {
+        opacity: 0;
+      }
+    </style>
   </head>
   <body class="w-screen h-full flex flex-col items-center overflow-x-hidden">
-    <h1 class="text-5xl">툴아웃풋</h1>
     <main
       class="w-full h-full flex flex-col items-center justify-center"
-      x-data="handleInput">
+      id="app">
+      <h1 class="my-2 text-5xl" v-if="!inputText">🔎See JSON Better📜</h1>
+      <!-- toast messages -->
+      <transition>
+        <div class="mt-25 toast toast-top toast-center" v-show="wrongJson">
+          <div class="alert alert-soft alert-error text-lg font-bold">
+            Not a JSON
+          </div>
+        </div>
+      </transition>
+      <transition>
+        <div class="mt-25 toast toast-top toast-center" v-show="notYetPasted">
+          <div class="alert alert-soft alert-error text-lg font-bold">
+            Paste a JSON
+          </div>
+        </div>
+      </transition>
+      <!-- /toast messages -->
+      <!-- buttons -->
+      <div class="my-2 w-2/3 flex flex-row justify-between">
+        <button
+          class="btn btn-soft btn-xl btn-secondary"
+          @click="textAreaEraser">
+          ❌RESET
+        </button>
+        <button
+          class="btn btn-soft btn-xl btn-primary"
+          @click="openSettingsModal">
+          ⚙️Setting
+        </button>
+      </div>
+      <!-- /buttons -->
+      <!-- modal -->
+      <dialog class="modal" ref="settingModal">
+        <div class="modal-box w-11/12 max-w-5xl flex flex-col h-[80vh]">
+          <form method="dialog">
+            <button
+              class="btn btn-sm btn-circle btn-soft btn-accent absolute right-2 top-2"
+              @click="applyImportantKeys">
+              <img class="size-10" src="./close-x.svg" />
+            </button>
+          </form>
+          <h3 class="text-lg font-bold">Choose elements to keep</h3>
+          <div class="flex-1 overflow-y-auto grid grid-cols-3 gap-2">
+            <template v-for="[depth, keySet] in allKeys" :key="depth">
+              <div class="divider col-span-full">Depth {{depth}}</div>
+              <button
+                class="btn btn-soft btn-neutral"
+                v-for="key in keySet"
+                :class="{'btn-active':isImportant(key)}"
+                @click="toggleKey(key)">
+                {{key}}
+              </button>
+            </template>
+          </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button class="hover:cursor-default" @click="applyImportantKeys">
+            Closer
+          </button>
+        </form>
+      </dialog>
+      <!-- /modal -->
+      <!-- text input -->
       <textarea
         class="textarea w-2/3 h-1/8 focus:outline-none"
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
-        x-model="inputText"
+        v-if="!inputText"
+        v-model="inputText"
         @input="jsonInputHandler()"></textarea>
+      <!-- /text input -->
+      <!-- visualized json -->
       <div
-        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 auto-rows-max gap-4">
-        <template x-for="item in tree">
-          <details
-            x-show="item.isImportant"
-            class="my-1 py-0.5 collapse bg-base-100 border"
-            :open="item.isOpen||!item.hasChild"
-            :class="!item.isShort&&'col-span-5'">
-            <summary
-              class="py-2 collapse-title bg-primary-content font-semibold"
-              x-text="item.key"></summary>
-            <div
-              class="collapse-content text-sm"
-              x-show="!item.hasChild"
-              x-text="item.value"></div>
-            <template x-if="item.hasChild">
-              <template x-for="child in item.value">
-                <details
-                  class="my-1 ml-3 collapse bg-base-200 border-base-300 border"
-                  open>
-                  <summary
-                    class="collapse-title bg-secondary-content font-semibold"
-                    x-text="child.key"></summary>
-                  <div
-                    class="collapse-content text-sm"
-                    x-show="!child.hasChild"
-                    x-text="child.value"></div>
-                </details>
-              </template>
-            </template>
-          </details>
-        </template>
+        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 gap-x-5 auto-rows-max">
+        <recur
+          v-for="node in parsedTree"
+          :node="node"
+          :bg-color="bgColor"
+          :is-important-keys-empty="isImportantKeysEmpty"></recur>
       </div>
+      <!-- /visualized json -->
     </main>
+    <!-- Vue script -->
     <script>
-      const importantKeys = new Set([
-        "asin",
-        "product_title",
-        "product_price",
-        "product_original_price",
-        "product_star_rating",
-        "product_num_ratings",
-        "product_url",
-        "about_product",
-        "customers_say",
-        "delivery",
-        "deal_badge",
-        "title",
-        "snippet",
-        "subnews",
-        "newsUrl",
-        "publisher",
-      ]);
-      document.addEventListener("alpine:init", () => {
-        Alpine.data("handleInput", () => ({
-          inputText: "",
-          tree: null,
+      const { createApp } = Vue;
+      const app = createApp({
+        data() {
+          return {
+            inputText: "",
+            parsedTree: null,
+            wrongJson: false,
+            notYetPasted: false,
+            bgColor: [
+              "bg-primary/50",
+              "bg-secondary/50",
+              "bg-accent/50",
+              "bg-info/50",
+              "bg-warning/50",
+              "bg-error/50",
+            ],
+            importantKeys: new Set(),
+            allKeys: new Map(),
+          };
+        },
+        methods: {
           jsonInputHandler() {
             try {
+              this.allKeys.clear();
               const parsed = JSON.parse(this.inputText);
-              this.tree = this.buildTree(parsed);
-              console.log(this.tree);
+              this.parsedTree = this.buildTree(parsed, 0);
+              console.log(this.parsedTree);
+              console.log(this.allKeys);
             } catch (e) {
-              this.tree = null;
+              this.textAreaEraser();
+              this.wrongJson = true;
+              setTimeout(() => {
+                this.wrongJson = false;
+              }, 2000);
             }
           },
-          buildTree(obj) {
-            if (typeof obj === "object" && obj !== null)
+          applyImportantKeys() {
+            try {
+              const parsed = JSON.parse(this.inputText);
+              this.parsedTree = this.buildTree(parsed, 0, false);
+            } catch (e) {
+              console.log("error while applying important keys");
+            }
+          },
+          buildTree(obj, depth, doCollect = true) {
+            if (typeof obj === "object" && obj !== null) {
               return Object.entries(obj).map(([K, V]) => {
-                const isObject = typeof V === "object" && V !== null;
-                const isImportant = importantKeys.has(K);
-                const isInArray = Array.isArray(obj);
+                if (doCollect) {
+                  if (!this.allKeys.has(depth))
+                    this.allKeys.set(depth, new Set());
+                  if (!Array.isArray(obj)) this.allKeys.get(depth).add(K);
+                }
+                const isChildObject = typeof V === "object" && V !== null;
+                const children = isChildObject
+                  ? this.buildTree(V, depth + 1, doCollect)
+                  : null;
+                const hasImportantChild =
+                  children && children.some((child) => child.isImportant);
                 return {
                   key: K,
-                  value: this.buildTree(V),
-                  hasChild: isObject,
-                  isShort: isObject ? false : String(V).length < 35,
-                  isImportant: isInArray ? true : isImportant,
-                  isOpen: isInArray || (isImportant && isObject),
+                  value: isChildObject ? null : V == null ? "null" : V,
+                  hasChild: isChildObject,
+                  children: children,
+                  isLong: isChildObject || String(V).length > 35,
+                  isImportant: this.isImportant(K) || hasImportantChild,
+                  depth: depth,
                 };
               });
-            else return obj;
+            } else return obj;
           },
-        }));
+          textAreaEraser() {
+            this.inputText = "";
+            this.parsedTree = null;
+            this.allKeys.clear();
+          },
+          openSettingsModal() {
+            if (this.inputText) this.$refs.settingModal.showModal();
+            else {
+              this.notYetPasted = true;
+              setTimeout(() => {
+                this.notYetPasted = false;
+              }, 2000);
+            }
+          },
+          toggleKey(key) {
+            if (this.importantKeys.has(key)) this.importantKeys.delete(key);
+            else this.importantKeys.add(key);
+          },
+          isImportant(key) {
+            return this.importantKeys.has(key);
+          },
+        },
+        computed: {
+          isImportantKeysEmpty() {
+            return this.importantKeys.size == 0;
+          },
+        },
       });
+      app.component("recur", {
+        name: "recur",
+        props: ["node", "bgColor", "isImportantKeysEmpty"],
+        template: `<details class="my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-5': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
+                    <summary class="py-2 collapse-title font-semibold" v-text="node.key" :class="bgColor[node.depth%6]"></summary>
+                    <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
+                    <div v-else><recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px"></recur></div>
+                  </details>`,
+      });
+      app.mount("#app");
     </script>
-    <footer></footer>
+    <!-- /Vue script -->
+    <!-- <footer class="footer footer-horizontal">
+      <a href="https://www.svgrepo.com" target="_blank">
+      Vector icons by SVG Repo</a>
+    </footer> -->
   </body>
 </html>
