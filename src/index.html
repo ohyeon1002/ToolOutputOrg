@@ -38,12 +38,31 @@
         </div>
       </transition>
       <!-- /toast messages -->
+
+      <!-- pipcounter -->
+      <teleport :to="pipTarget" v-if="isPipOpen && pipTarget">
+        <!-- 스타일 로직 제외, 기능만 유지 -->
+        <div>
+          <h2>Counter</h2>
+          <h1>{{ pipCount }}</h1>
+          <div>
+            <button @click="pipCount++">➕ UP</button>
+            <button @click="pipCount = 0">🔄 RESET</button>
+          </div>
+        </div>
+      </teleport>
+      <!-- /pipcounter -->
+
       <!-- buttons -->
       <div class="my-2 w-2/3 flex flex-row justify-between">
         <button
           class="btn btn-soft btn-xl btn-secondary"
           @click="textAreaEraser">
           ❌RESET
+        </button>
+        <!-- 추가된 PiP 버튼 -->
+        <button class="btn btn-soft btn-xl btn-info" @click="openPipCounter">
+          ⏱️Counter
         </button>
         <button
           class="btn btn-soft btn-xl btn-primary"
@@ -52,6 +71,7 @@
         </button>
       </div>
       <!-- /buttons -->
+
       <!-- modal -->
       <dialog class="modal" ref="settingModal">
         <div class="modal-box w-11/12 max-w-5xl flex flex-col h-[80vh]">
@@ -122,6 +142,11 @@
             ],
             importantKeys: new Set(),
             allKeys: new Map(),
+            // --- PiP 관련 변수 추가 ---
+            pipCount: 0,
+            isPipOpen: false,
+            pipTarget: null, // Teleport 목적지
+            pipWindowRef: null,
           };
         },
         methods: {
@@ -194,6 +219,44 @@
           },
           isImportant(key) {
             return this.importantKeys.has(key);
+          },
+          // --- PiP 관련 메서드 추가 ---
+          async openPipCounter() {
+            // 1. 이미 열려있으면 포커스만 하고 종료
+            if (this.isPipOpen && this.pipWindowRef) {
+              this.pipWindowRef.focus();
+              return;
+            }
+
+            // 2. 브라우저 지원 확인
+            if (!window.documentPictureInPicture) {
+              alert("PiP 미지원 브라우저");
+              return;
+            }
+
+            try {
+              // 3. PiP 창 생성
+              const pipWin =
+                await window.documentPictureInPicture.requestWindow({
+                  width: 300,
+                  height: 250,
+                });
+              this.pipWindowRef = pipWin;
+
+              // 4. [로직 핵심] Vue Teleport 타겟을 새 창의 body로 지정
+              // 스타일 복사 코드 전부 제거함
+              this.pipTarget = pipWin.document.body;
+              this.isPipOpen = true;
+
+              // 5. 창 닫힘 감지 (상태 초기화)
+              pipWin.addEventListener("pagehide", () => {
+                this.isPipOpen = false;
+                this.pipTarget = null;
+                this.pipWindowRef = null;
+              });
+            } catch (err) {
+              console.error("PiP Error:", err);
+            }
           },
         },
         computed: {
