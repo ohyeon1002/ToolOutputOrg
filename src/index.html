@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -126,7 +127,7 @@
         v-model="inputText"
         @input="jsonInputHandler"></textarea>
       <textarea
-        class="textarea mt-5 w-2/3 h-1/12 focus:outline-none"
+        class="textarea mt-5 w-2/3 focus:outline-none overflow-y-hidden"
         placeholder='"param1": "value1",&#10;"param2": number2,&#10;"param3": "value3"  becomes … `param1` "value1", `param2` "number2", and `param3` "value3".'
         v-if="!inputText&&!inputParams"
         v-model="inputParams"
