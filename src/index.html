@@ -22,6 +22,10 @@
       class="w-full h-full flex flex-col items-center justify-center"
       id="app">
       <h1 class="my-2 text-5xl" v-if="!inputText">🔎See JSON Better📜</h1>
+      <ul v-if="selectedSubjects">
+        <li class="text-3xl" v-for="sbj in selectedSubjects">{{sbj}}</li>
+      </ul>
+
       <!-- toast messages -->
       <transition>
         <div class="mt-25 toast toast-top toast-center" v-show="wrongJson">
@@ -34,6 +38,13 @@
         <div class="mt-25 toast toast-top toast-center" v-show="notYetPasted">
           <div class="alert alert-soft alert-error text-lg font-bold">
             Paste a JSON
+          </div>
+        </div>
+      </transition>
+      <transition>
+        <div class="toast toast-middle toast-center" v-show="isJustCopied">
+          <div class="alert alert-soft alert-success text-lg font-bold">
+            ✅Copied!
           </div>
         </div>
       </transition>
@@ -55,19 +66,22 @@
 
       <!-- buttons -->
       <div class="my-2 w-2/3 flex flex-row justify-between">
-        <button
-          class="btn btn-soft btn-xl btn-secondary"
-          @click="textAreaEraser">
-          ❌RESET
+        <button class="btn btn-soft btn-xl" @click="textAreaEraser">
+          🗑️WIPE
         </button>
-        <!-- 추가된 PiP 버튼 -->
         <button class="btn btn-soft btn-xl btn-info" @click="openPipCounter">
           ⏱️Counter
+        </button>
+        <button class="btn btn-soft btn-xl btn-accent" @click="randomSubjects">
+          ❓Random
         </button>
         <button
           class="btn btn-soft btn-xl btn-primary"
           @click="openSettingsModal">
           ⚙️Setting
+        </button>
+        <button class="btn btn-soft btn-xl btn-secondary" @click="refresh">
+          ❌RESET
         </button>
       </div>
       <!-- /buttons -->
@@ -109,8 +123,28 @@
         placeholder="Paste JSON here!&#10;It's not going anywhere - Handled locally."
         v-if="!inputText"
         v-model="inputText"
-        @input="jsonInputHandler()"></textarea>
+        @input="jsonInputHandler"></textarea>
+      <textarea
+        class="textarea mt-5 w-2/3 h-1/12 focus:outline-none"
+        placeholder='"param1": "value1",&#10;"param2": number2,&#10;"param3": "value3"  becomes … `param1` "value1", `param2` "number2", and `param3` "value3".'
+        v-if="!inputText&&!inputParams"
+        v-model="inputParams"
+        @input="paramsInputHandler"></textarea>
       <!-- /text input -->
+      <!-- params comment -->
+      <div class="join w-2/3 mt-5" v-if="paramsComment">
+        <input
+          type="text"
+          class="join-item input input-xl input-success w-full text-2xl"
+          v-model="paramsComment"
+          readonly />
+        <button
+          class="join-item btn btn-xl btn-success"
+          @click="copyParamsComment">
+          📋COPY
+        </button>
+      </div>
+      <!-- /params comment -->
       <!-- visualized json -->
       <div
         class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 gap-x-5 auto-rows-max">
@@ -147,6 +181,43 @@
             isPipOpen: false,
             pipTarget: null, // Teleport 목적지
             pipWindowRef: null,
+            taskSubjects: [
+              "1.1.1",
+              "1.1.2",
+              "1.1.3",
+              "1.1.4",
+              "1.2.1",
+              "1.2.2",
+              "1.2.3",
+              "1.2.4",
+              "1.2.5",
+              "1.2.6",
+              "1.4.1",
+              "1.4.2",
+              "1.4.3",
+              "1.5.1",
+              "1.5.2",
+              "2.1.1",
+              "2.1.2",
+              "3.3.1",
+              "3.3.2",
+              "3.3.3",
+              "4.1.1",
+              "4.1.4",
+              "4.1.5",
+              "4.1.6",
+              "2.2.1",
+              "2.2.2",
+              "2.2.3",
+              "4.3.1",
+              "4.3.2",
+              "4.5.1",
+              "4.5.2",
+            ],
+            selectedSubjects: null,
+            inputParams: "",
+            paramsComment: "",
+            isJustCopied: false,
           };
         },
         methods: {
@@ -203,6 +274,9 @@
             this.inputText = "";
             this.parsedTree = null;
             this.allKeys.clear();
+            this.inputParams = "";
+            this.paramsComment = "";
+            this.selectedSubjects = null;
           },
           openSettingsModal() {
             if (this.inputText) this.$refs.settingModal.showModal();
@@ -258,6 +332,55 @@
               console.error("PiP Error:", err);
             }
           },
+          refresh() {
+            window.location.reload();
+          },
+          randomSubjects() {
+            const selectedSubjectsArray = new Array();
+            const subjectsNumber = this.taskSubjects.length;
+            const firstRand = Math.floor(Math.random() * subjectsNumber);
+            let secondRand = Math.floor(Math.random() * subjectsNumber);
+            while (firstRand == secondRand) {
+              secondRand = Math.floor(Math.random() * subjectsNumber);
+            }
+            selectedSubjectsArray.push(this.taskSubjects[firstRand]);
+            selectedSubjectsArray.push(this.taskSubjects[secondRand]);
+            this.selectedSubjects = selectedSubjectsArray;
+          },
+          paramsInputHandler() {
+            let trimmedInputParams = this.inputParams.trim();
+            let parsedParamsJson = "";
+
+            if (!trimmedInputParams.startsWith("{")) {
+              trimmedInputParams = `{${trimmedInputParams}}`;
+            }
+
+            try {
+              parsedParamsJson = JSON.parse(trimmedInputParams);
+            } catch (err) {
+              return;
+            }
+            const formatter = new Intl.ListFormat("en", {
+              style: "long",
+              type: "conjunction",
+            });
+            let comment = "";
+            const formattedParsedParamsJson = Object.entries(
+              parsedParamsJson
+            ).map(([key, value]) => `\`${key}\` "${value}"`);
+            this.paramsComment = formatter.format(formattedParsedParamsJson);
+          },
+          async copyParamsComment() {
+            try {
+              await navigator.clipboard.writeText(this.paramsComment);
+              this.isJustCopied = true;
+              setTimeout(() => {
+                this.isJustCopied = false;
+              }, 2000);
+            } catch (err) {
+              console.error(err.message);
+            }
+          },
         },
         computed: {
           isImportantKeysEmpty() {
@@ -268,10 +391,12 @@
       app.component("recur", {
         name: "recur",
         props: ["node", "bgColor", "isImportantKeysEmpty"],
-        template: `<details class="my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-5': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
+        template: `<details class="w-auto my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-5': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
                     <summary class="py-2 collapse-title font-semibold" v-text="node.key" :class="bgColor[node.depth%6]"></summary>
                     <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
-                    <div v-else><recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px"></recur></div>
+                    <div v-else :class="{'grid grid-cols-5 gap-x-0.5 auto-rows-max': node.hasChild}">
+                      <recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px"></recur>
+                    </div>
                   </details>`,
       });
       app.mount("#app");
