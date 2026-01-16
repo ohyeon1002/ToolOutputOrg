@@ -265,7 +265,7 @@
                   value: isChildObject ? null : V == null ? "null" : V,
                   hasChild: isChildObject,
                   children: children,
-                  isLong: isChildObject || String(V).length > 30,
+                  isLong: isChildObject || String(V).length > 50,
                   isImportant: this.isImportant(K) || hasImportantChild,
                   depth: depth,
                 };
