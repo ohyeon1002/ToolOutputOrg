@@ -401,7 +401,7 @@
                     <summary class="py-2 collapse-title font-semibold" v-text="node.key" :class="bgColor[node.depth%6]"></summary>
                     <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
                     <div v-else :class="{'grid grid-cols-4 gap-x-0.5 auto-rows-max': node.hasChild}">
-                      <recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px"></recur>
+                      <recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px; margin-right:5px;"></recur>
                     </div>
                   </details>`,
       });
