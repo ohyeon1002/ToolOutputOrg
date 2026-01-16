@@ -149,7 +149,7 @@
       <!-- /params comment -->
       <!-- visualized json -->
       <div
-        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-5 gap-x-5 auto-rows-max">
+        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-4 gap-x-5 auto-rows-max">
         <recur
           v-for="node in parsedTree"
           :node="node"
@@ -265,7 +265,7 @@
                   value: isChildObject ? null : V == null ? "null" : V,
                   hasChild: isChildObject,
                   children: children,
-                  isLong: isChildObject || String(V).length > 35,
+                  isLong: isChildObject || String(V).length > 30,
                   isImportant: this.isImportant(K) || hasImportantChild,
                   depth: depth,
                 };
@@ -397,10 +397,10 @@
       app.component("recur", {
         name: "recur",
         props: ["node", "bgColor", "isImportantKeysEmpty"],
-        template: `<details class="w-auto my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-5': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
+        template: `<details class="w-auto my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-4': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
                     <summary class="py-2 collapse-title font-semibold" v-text="node.key" :class="bgColor[node.depth%6]"></summary>
                     <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
-                    <div v-else :class="{'grid grid-cols-5 gap-x-0.5 auto-rows-max': node.hasChild}">
+                    <div v-else :class="{'grid grid-cols-4 gap-x-0.5 auto-rows-max': node.hasChild}">
                       <recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px"></recur>
                     </div>
                   </details>`,
