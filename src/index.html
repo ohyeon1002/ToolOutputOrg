@@ -30,9 +30,9 @@
 
       <!-- toast messages -->
       <transition>
-        <div class="mt-25 toast toast-top toast-center" v-show="wrongJson">
+        <div class="mt-25 toast toast-top toast-center" v-show="wrongFormat">
           <div class="alert alert-soft alert-error text-lg font-bold">
-            Not a JSON
+            Invalid Format
           </div>
         </div>
       </transition>
@@ -166,7 +166,7 @@
           return {
             inputText: "",
             parsedTree: null,
-            wrongJson: false,
+            wrongFormat: false,
             notYetPasted: false,
             bgColor: [
               "bg-primary/50",
@@ -208,9 +208,9 @@
               "4.1.4",
               "4.1.5",
               "4.1.6",
-              "2.2.1",
-              "2.2.2",
-              "2.2.3",
+              "4.2.1",
+              "4.2.2",
+              "4.2.3",
               "4.3.1",
               "4.3.2",
               "4.5.1",
@@ -232,9 +232,9 @@
               console.log(this.allKeys);
             } catch (e) {
               this.textAreaEraser();
-              this.wrongJson = true;
+              this.wrongFormat = true;
               setTimeout(() => {
-                this.wrongJson = false;
+                this.wrongFormat = false;
               }, 2000);
             }
           },
@@ -359,8 +359,12 @@
 
             try {
               parsedParamsJson = JSON.parse(trimmedInputParams);
-            } catch (err) {
-              return;
+            } catch (e) {
+              this.textAreaEraser();
+              this.wrongFormat = true;
+              setTimeout(() => {
+                this.wrongFormat = false;
+              }, 2000);
             }
             const formatter = new Intl.ListFormat("en", {
               style: "long",
