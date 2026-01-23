@@ -2,8 +2,22 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Visualize and organize messy JSON structures instantly. Comes with handy tools like counters and random sectionID generators." />
+    <meta property="og:title" content="Organize JSON & Tools" />
+    <meta
+      property="og:description"
+      content="Visualize and organize messy JSON structures instantly. Comes with handy tools like counters and random sectionID generators." />
+    <meta
+      property="og:image"
+      content="https://tool-output-org.vercel.app/src/img/thmb.png" />
+    <meta property="og:url" content="https://tool-output-org.vercel.app" />
+    <meta property="og:type" content="website" />
+
     <link rel="stylesheet" href="./output.css" />
-    <link rel="icon" href="./brackets.svg" />
+    <link rel="icon" href="./svg/brackets.svg" />
     <title>JSON output organize</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
@@ -19,7 +33,7 @@
       }
     </style>
   </head>
-  <body class="w-screen h-full flex flex-col items-center overflow-x-hidden">
+  <body class="w-screen h-screen flex flex-col items-center overflow-x-hidden">
     <main
       class="w-full h-full flex flex-col items-center justify-center"
       id="app">
@@ -95,7 +109,7 @@
             <button
               class="btn btn-sm btn-circle btn-soft btn-accent absolute right-2 top-2"
               @click="applyImportantKeys">
-              <img class="size-10" src="./close-x.svg" />
+              <img class="size-10" src="./svg/close-x.svg" />
             </button>
           </form>
           <h3 class="text-lg font-bold">Choose elements to keep</h3>
@@ -157,6 +171,58 @@
           :is-important-keys-empty="isImportantKeysEmpty"></recur>
       </div>
       <!-- /visualized json -->
+      <Teleport to="body" v-if="!inputText">
+        <footer
+          class="footer py-5 footer-horizontal place-items-center bg-neutral-content/30">
+          <nav>
+            <h6 class="footer-title">Tech Stack</h6>
+            <a
+              href="https://ko.veujs.org"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img src="./svg/vue.svg" class="w-5 h-5" />Vue.js
+            </a>
+            <a
+              href="https://tailwindcss.com"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img src="./svg/tailwindcss.svg" class="w-5 h-5" />TailwindCss
+            </a>
+            <a
+              href="https://daisyui.com"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img src="./svg/daisyui.svg" class="w-5 h-5" />daisyUI
+            </a>
+          </nav>
+          <nav>
+            <h6 class="footer-title">miscellaneous</h6>
+            <a
+              href="https://www.svgrepo.com"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img src="./svg/svgrepo.svg" class="w-10 h-5 ojbect-contain" />SVG
+              Repo
+            </a>
+            <a
+              href="https://vercel.com"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img
+                src="./svg/vercel.svg"
+                class="w-10 h-5 ojbect-contain" />Vercel
+            </a>
+            <a
+              href="https://github.com/ohyeon1002/ToolOutputOrg"
+              target="_blank"
+              class="link link-hover flex gap-2">
+              <img
+                src="./svg/github.svg"
+                class="w-10 h-5 ojbect-contain" />GitHub Repo
+            </a>
+          </nav>
+        </footer>
+      </Teleport>
     </main>
     <!-- Vue script -->
     <script>
@@ -408,9 +474,5 @@
       app.mount("#app");
     </script>
     <!-- /Vue script -->
-    <!-- <footer class="footer footer-horizontal">
-      <a href="https://www.svgrepo.com" target="_blank">
-      Vector icons by SVG Repo</a>
-    </footer> -->
   </body>
 </html>
