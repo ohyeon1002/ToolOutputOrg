@@ -248,7 +248,7 @@
             <div class="mockup-code w-lg place-self-center">
               <button
                 class="btn btn-success absolute top-1 right-1"
-                @click="copyText(dummyJson)">
+                @click="copyText(JSON.stringify(dummyJson))">
                 📋COPY
               </button>
               <pre class="pl-5"><code>{{dummyJson}}</code></pre>
