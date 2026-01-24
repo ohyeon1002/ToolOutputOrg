@@ -9,7 +9,7 @@
     <meta property="og:title" content="Organize JSON & Tools" />
     <meta
       property="og:description"
-      content="Visualize and organize messy JSON structures instantly. Comes with handy tools like a counter and a random sectionID generator." />
+      content="Visualize structure instantly and focus only on the keys that matter." />
     <meta
       property="og:image"
       content="https://tool-output-org.vercel.app/img/thmb.png" />
@@ -18,7 +18,7 @@
 
     <link rel="stylesheet" href="./output.css" />
     <link rel="icon" href="./svg/brackets.svg" />
-    <title>JSON output organize</title>
+    <title>JSON Visualizer</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
     <style>
@@ -57,28 +57,18 @@
 
       <!-- toast messages -->
       <transition>
-        <div
-          class="mt-25 toast toast-top toast-center z-50"
-          v-show="wrongFormat">
-          <div class="alert alert-soft alert-error text-lg font-bold">
-            Invalid Format
-          </div>
+        <div class="toast toast-middle toast-center z-50" v-show="wrongFormat">
+          <div class="alert alert-error text-lg font-bold">Invalid Format</div>
         </div>
       </transition>
       <transition>
-        <div
-          class="mt-25 toast toast-top toast-center z-50"
-          v-show="notYetPasted">
-          <div class="alert alert-soft alert-error text-lg font-bold">
-            Paste a JSON
-          </div>
+        <div class="toast toast-middle toast-center z-50" v-show="notYetPasted">
+          <div class="alert alert-error text-lg font-bold">Paste a JSON</div>
         </div>
       </transition>
       <transition>
         <div class="toast toast-middle toast-center z-50" v-show="isJustCopied">
-          <div class="alert alert-soft alert-success text-lg font-bold">
-            ✅Copied!
-          </div>
+          <div class="alert alert-success text-lg font-bold">✅Copied!</div>
         </div>
       </transition>
       <!-- /toast messages -->
@@ -166,6 +156,20 @@
         v-model="inputParams"
         @input="paramsInputHandler"></textarea>
       <!-- /text input -->
+      <!-- params comment -->
+      <div class="join w-2/3 mt-5" v-if="paramsComment">
+        <input
+          type="text"
+          class="join-item input input-xl input-success w-full text-2xl"
+          v-model="paramsComment"
+          readonly />
+        <button
+          class="join-item btn btn-xl btn-success"
+          @click="copyText(paramsComment)">
+          📋COPY
+        </button>
+      </div>
+      <!-- /params comment -->
 
       <section class="w-2/3 mb-10 mx-auto" v-if="!inputText">
         <div
@@ -414,20 +418,6 @@
         </div>
       </section>
 
-      <!-- params comment -->
-      <div class="join w-2/3 mt-5" v-if="paramsComment">
-        <input
-          type="text"
-          class="join-item input input-xl input-success w-full text-2xl"
-          v-model="paramsComment"
-          readonly />
-        <button
-          class="join-item btn btn-xl btn-success"
-          @click="copyText(paramsComment)">
-          📋COPY
-        </button>
-      </div>
-      <!-- /params comment -->
       <!-- visualized json -->
       <div
         class="w-2/3 flex-1 overflow-y-auto grid grid-cols-3 lg:grid-cols-4 gap-x-5 auto-rows-max">
