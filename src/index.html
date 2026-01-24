@@ -99,21 +99,23 @@
 
       <!-- buttons -->
       <div class="my-2 w-2/3 flex flex-row justify-between">
-        <button class="btn btn-soft btn-xl" @click="textAreaEraser">
+        <button class="btn btn-soft lg:btn-xl" @click="textAreaEraser">
           🗑️WIPE
         </button>
-        <button class="btn btn-soft btn-xl btn-info" @click="openPipCounter">
+        <button class="btn btn-soft lg:btn-xl btn-info" @click="openPipCounter">
           ⏱️Counter
         </button>
-        <button class="btn btn-soft btn-xl btn-accent" @click="randomSubjects">
+        <button
+          class="btn btn-soft lg:btn-xl btn-accent"
+          @click="randomSubjects">
           ❓Random
         </button>
         <button
-          class="btn btn-soft btn-xl btn-primary"
+          class="btn btn-soft lg:btn-xl btn-primary"
           @click="openSettingsModal">
           ⚙️Setting
         </button>
-        <button class="btn btn-soft btn-xl btn-secondary" @click="refresh">
+        <button class="btn btn-soft lg:btn-xl btn-secondary" @click="refresh">
           ❌RESET
         </button>
       </div>
@@ -269,7 +271,7 @@
               Your JSON is instantly transformed into a readable tree structure.
             </p>
             <div
-              class="w-2/3 flex-1 overflow-y-auto grid grid-cols-4 gap-x-5 auto-rows-max place-self-center">
+              class="w-full lg:w-2/3 flex-1 overflow-y-auto grid grid-cols-3 lg:grid-cols-4 gap-x-5 auto-rows-max place-self-center">
               <recur
                 v-for="node in demoTree"
                 :node="node"
@@ -428,7 +430,7 @@
       <!-- /params comment -->
       <!-- visualized json -->
       <div
-        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-4 gap-x-5 auto-rows-max">
+        class="w-2/3 flex-1 overflow-y-auto grid grid-cols-3 lg:grid-cols-4 gap-x-5 auto-rows-max">
         <recur
           v-for="node in parsedTree"
           :node="node"
@@ -730,10 +732,10 @@
       app.component("recur", {
         name: "recur",
         props: ["node", "bgColor", "isImportantKeysEmpty"],
-        template: `<details class="w-auto my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-4': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
+        template: `<details class="w-auto my-1 py-0.5 collapse bg-base-100 border" :class="{'col-span-3 lg:col-span-4': node.isLong}" v-show="isImportantKeysEmpty||node.isImportant" open>
                     <summary class="py-2 collapse-title font-semibold" v-text="node.key" :class="bgColor[node.depth%6]"></summary>
                     <div class="collapse-content text-sm" v-if="!node.hasChild" v-text="node.value"></div>
-                    <div v-else :class="{'grid grid-cols-4 gap-x-0.5 auto-rows-max': node.hasChild}">
+                    <div v-else :class="{'grid grid-cols-3 lg:grid-cols-4 gap-x-0.5 auto-rows-max': node.hasChild}">
                       <recur v-for="child in node.children" :node="child" :bg-color="bgColor" :is-important-keys-empty="isImportantKeysEmpty" style="margin-left:10px; margin-right:5px;"></recur>
                     </div>
                   </details>`,
