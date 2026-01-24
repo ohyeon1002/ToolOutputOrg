@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -33,32 +33,44 @@
       }
     </style>
   </head>
-  <body class="w-screen h-screen flex flex-col items-center overflow-x-hidden">
+  <body
+    class="w-screen h-full flex flex-col items-center overflow-x-hidden overflow-y-auto">
     <main
       class="w-full h-full flex flex-col items-center justify-center"
       id="app">
-      <h1 class="my-2 text-5xl" v-if="!inputText">🔎See JSON Better📜</h1>
+      <h1
+        class="my-8 text-5xl font-extrabold text-center tracking-tight"
+        v-if="!inputText">
+        <span
+          class="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">
+          JSON Visualizer
+        </span>
+      </h1>
       <ul v-if="selectedSubjects">
         <li class="text-3xl" v-for="sbj in selectedSubjects">{{sbj}}</li>
       </ul>
 
       <!-- toast messages -->
       <transition>
-        <div class="mt-25 toast toast-top toast-center" v-show="wrongFormat">
+        <div
+          class="mt-25 toast toast-top toast-center z-50"
+          v-show="wrongFormat">
           <div class="alert alert-soft alert-error text-lg font-bold">
             Invalid Format
           </div>
         </div>
       </transition>
       <transition>
-        <div class="mt-25 toast toast-top toast-center" v-show="notYetPasted">
+        <div
+          class="mt-25 toast toast-top toast-center z-50"
+          v-show="notYetPasted">
           <div class="alert alert-soft alert-error text-lg font-bold">
             Paste a JSON
           </div>
         </div>
       </transition>
       <transition>
-        <div class="toast toast-middle toast-center" v-show="isJustCopied">
+        <div class="toast toast-middle toast-center z-50" v-show="isJustCopied">
           <div class="alert alert-soft alert-success text-lg font-bold">
             ✅Copied!
           </div>
@@ -147,6 +159,254 @@
         v-model="inputParams"
         @input="paramsInputHandler"></textarea>
       <!-- /text input -->
+
+      <section class="w-2/3 mb-10 mx-auto" v-if="!inputText">
+        <div
+          class="mt-10 mb-6 text-center border-b border-base-content/10 pb-6">
+          <div class="badge badge-primary badge-outline mb-3">JSON Viewer</div>
+          <h3 class="text-3xl font-extrabold tracking-tight mb-3">
+            Untangle Massive JSON <br />
+            <span class="text-primary">in Milliseconds.</span>
+          </h3>
+          <p class="text-sm text-base-content/70 max-w-lg mx-auto">
+            Paste your raw data above. Visualize structure instantly and focus
+            only on the keys that matter.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
+          <div class="card bg-base-200/50 shadow-sm border border-base-300">
+            <div class="card-body p-4">
+              <h4 class="card-title text-base flex items-center gap-2">
+                <span>🔍</span> Deep Recursive Visualization
+              </h4>
+              <p class="text-xs text-base-content/70 mt-1">
+                We parse your JSON into a responsive, color-coded interactive
+                tree. Navigate deep structures with clarity.
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-200/50 shadow-sm border border-base-300">
+            <div class="card-body p-4">
+              <h4 class="card-title text-base flex items-center gap-2">
+                <span>🎯</span> Smart Key Filtering
+              </h4>
+              <p class="text-xs text-base-content/70 mt-1">
+                Define your <strong>focus keys</strong>. Our engine highlights
+                only the data you need and the paths to get there.
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-200/50 shadow-sm border border-base-300">
+            <div class="card-body p-4">
+              <h4 class="card-title text-base flex items-center gap-2">
+                <span>⚡</span> Instant & Secure
+              </h4>
+              <p class="text-xs text-base-content/70 mt-1">
+                No server latency. <strong>100% Client-side.</strong> Paste
+                sensitive configs or massive API responses safely.
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-200/50 shadow-sm border border-base-300">
+            <div class="card-body p-4">
+              <h4 class="card-title text-base flex items-center gap-2">
+                <span>🎨</span> Adaptive Grid Layout
+              </h4>
+              <p class="text-xs text-base-content/70 mt-1">
+                Auto-detection for long strings and complex objects ensures
+                readability while keeping simple values compact.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="divider my-12">
+          <span class="text-xl font-bold text-base-content/80">User Guide</span>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg flex gap-2">
+              <span
+                class="badge badge-primary h-6 w-6 rounded-full flex items-center justify-center p-0">
+                1
+              </span>
+              Paste the Raw JSON
+            </h3>
+            <p class="text-base-content/70 text-sm mb-4">
+              Simply copy your raw JSON string and paste it into the main text
+              area.
+            </p>
+            <div class="mockup-code w-lg place-self-center">
+              <button
+                class="btn btn-success absolute top-1 right-1"
+                @click="copyText(dummyJson)">
+                📋COPY
+              </button>
+              <pre class="pl-5"><code>{{dummyJson}}</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg flex gap-2">
+              <span
+                class="badge badge-primary h-6 w-6 rounded-full flex items-center justify-center p-0">
+                2
+              </span>
+              Visualized Structure
+            </h3>
+            <p class="text-base-content/70 text-sm mb-4">
+              Your JSON is instantly transformed into a readable tree structure.
+            </p>
+            <div
+              class="w-2/3 flex-1 overflow-y-auto grid grid-cols-4 gap-x-5 auto-rows-max place-self-center">
+              <recur
+                v-for="node in demoTree"
+                :node="node"
+                :bg-color="bgColor"
+                :is-important-keys-empty="isImportantKeysEmpty"></recur>
+            </div>
+
+            <div class="mt-8">
+              <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-4 h-4 text-primary">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+                Collapsible Nodes
+              </h4>
+              <p class="text-xs text-base-content/70 mb-3">
+                Click any key name to collapse or expand that section.
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                  <span
+                    class="text-xs font-semibold text-center uppercase tracking-wide opacity-50">
+                    Before
+                  </span>
+                  <img
+                    src="./img/json3.png"
+                    alt="Before Collapsing"
+                    class="rounded border border-base-300" />
+                </div>
+                <div class="flex flex-col gap-2">
+                  <span
+                    class="text-xs font-semibold text-center uppercase tracking-wide opacity-50">
+                    After
+                  </span>
+                  <img
+                    src="./img/json4.png"
+                    alt="After Collapsing"
+                    class="rounded border border-base-300" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg flex gap-2">
+              <span
+                class="badge badge-primary h-6 w-6 rounded-full flex items-center justify-center p-0">
+                3
+              </span>
+              Focus Keys Feature
+            </h3>
+            <p class="text-base-content/70 text-sm">
+              Filter out the noise and see only the specific keys you need.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
+              <div>
+                <ol
+                  class="list-decimal list-inside text-sm text-base-content/80 space-y-3">
+                  <li class="items-center gap-2">
+                    Click
+                    <button
+                      class="btn btn-soft btn-xs btn-primary pointer-events-none">
+                      ⚙️Setting
+                    </button>
+                  </li>
+                  <li>Select the specific keys you want to keep.</li>
+                  <li>
+                    Click the <strong>X</strong> button or outside the modal to
+                    apply.
+                  </li>
+                </ol>
+                <div class="mt-4 p-3 bg-base-200 rounded-lg text-xs">
+                  <strong>Tip:</strong> To restore the full JSON view, open the
+                  settings again and unselect all keys.
+                </div>
+              </div>
+              <div class="flex flex-col gap-4">
+                <img
+                  src="./img/keysmodal1.png"
+                  alt="Selecting Keys"
+                  class="rounded border border-base-300 shadow-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert shadow-sm border border-primary/20 bg-primary/5">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            class="stroke-primary shrink-0 w-6 h-6">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="w-full">
+            <h3 class="font-bold text-sm">Workflow: Starting a New JSON</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div>
+                <div class="mb-2">
+                  <button class="btn btn-soft btn-sm pointer-events-none">
+                    🗑️WIPE
+                  </button>
+                </div>
+                <p class="text-xs opacity-80">
+                  Clears the text area but
+                  <strong>keeps your Focus Keys</strong>. Perfect for pasting a
+                  new JSON with the same schema.
+                </p>
+              </div>
+              <div>
+                <div class="mb-2">
+                  <button
+                    class="btn btn-soft btn-sm btn-secondary pointer-events-none">
+                    ❌RESET
+                  </button>
+                </div>
+                <p class="text-xs opacity-80">
+                  Clears everything, including text and Focus Keys. Returns the
+                  app to its initial state.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- params comment -->
       <div class="join w-2/3 mt-5" v-if="paramsComment">
         <input
@@ -156,7 +416,7 @@
           readonly />
         <button
           class="join-item btn btn-xl btn-success"
-          @click="copyParamsComment">
+          @click="copyText(paramsComment)">
           📋COPY
         </button>
       </div>
@@ -218,14 +478,16 @@
               class="link link-hover flex gap-2">
               <img
                 src="./svg/github.svg"
-                class="w-10 h-5 ojbect-contain" />GitHub Repo
+                class="w-10 h-5 ojbect-contain" />GitHub
             </a>
           </nav>
         </footer>
       </Teleport>
     </main>
     <!-- Vue script -->
-    <script>
+    <script type="module">
+      import dummyJson from "./dummy-json.js";
+      import demoTree from "./demo-tree.js";
       const { createApp } = Vue;
       const app = createApp({
         data() {
@@ -286,6 +548,8 @@
             inputParams: "",
             paramsComment: "",
             isJustCopied: false,
+            dummyJson: dummyJson,
+            demoTree: demoTree,
           };
         },
         methods: {
@@ -294,8 +558,6 @@
               this.allKeys.clear();
               const parsed = JSON.parse(this.inputText);
               this.parsedTree = this.buildTree(parsed, 0);
-              console.log(this.parsedTree);
-              console.log(this.allKeys);
             } catch (e) {
               this.textAreaEraser();
               this.wrongFormat = true;
@@ -438,13 +700,13 @@
             });
             let comment = "";
             const formattedParsedParamsJson = Object.entries(
-              parsedParamsJson
+              parsedParamsJson,
             ).map(([key, value]) => `\`${key}\` "${value}"`);
             this.paramsComment = formatter.format(formattedParsedParamsJson);
           },
-          async copyParamsComment() {
+          async copyText(text) {
             try {
-              await navigator.clipboard.writeText(this.paramsComment);
+              await navigator.clipboard.writeText(text);
               this.isJustCopied = true;
               setTimeout(() => {
                 this.isJustCopied = false;
