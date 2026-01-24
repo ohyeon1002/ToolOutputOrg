@@ -31,12 +31,17 @@
       .v-leave-to {
         opacity: 0;
       }
+
+      [v-cloak] {
+        display: none !important;
+      }
     </style>
   </head>
   <body
     class="w-screen h-full flex flex-col items-center overflow-x-hidden overflow-y-auto">
     <main
       class="w-full h-full flex flex-col items-center justify-center"
+      v-cloak
       id="app">
       <h1
         class="my-8 text-5xl font-extrabold text-center tracking-tight"
